@@ -42,22 +42,22 @@ TClasslessInstanceHook(__int64, "?LogIPSupport@RakPeerHelper@@AEAAXW4PeerPurpose
     if (globalConfig.enableFixListenPort) {
         if (isFirstLog) {
             isFirstLog = false;
-            original(this);
+            __int64 rt = original(this);
             endTime = clock();
             Logger("Server").info("Done (" + fmt::format("{:.1f}", static_cast<double>(endTime - startTime) / 1000) +
                                   R"(s)! For help, type "help" or "?")");
-            return 1;
+            return rt;
         }
         return 0;
     } else {
-        original(this);
+        __int64 rt = original(this);
         if (!isFirstLog) {
             endTime = clock();
             Logger("Server").info("Done (" + fmt::format("{:.1f}", static_cast<double>(endTime - startTime) / 1000) +
                                   R"(s)! For help, type "help" or "?")");
         }
         isFirstLog = false;
-        return 1;
+        return rt;
     }
 }
 
@@ -179,13 +179,13 @@ TInstanceHook(void, "?moveSpawnView@Player@@QEAAXAEBVVec3@@V?$AutomaticID@VDimen
     fixPlayerPosition(this, false);
 }
 
+
 TClasslessInstanceHook(
     __int64,
-    "?move@ChunkViewSource@@QEAAXAEBVBlockPos@@H_NW4ChunkSourceViewGenerateMode@ChunkSource@@V?$function@$$A6AXV?$"
-    "buffer_span_mut@V?$shared_ptr@VLevelChunk@@@std@@@@V?$buffer_span@I@@@Z@std@@UActorUniqueID@@@Z",
-    BlockPos a2, int a3, unsigned __int8 a4, int a5, __int64 a6, __int64 a7) {
+    "?move@ChunkViewSource@@QEAAXAEBVBlockPos@@H_NW4ChunkSourceViewGenerateMode@@V?$function@$$A6AXV?$buffer_span_mut@V?$shared_ptr@VLevelChunk@@@std@@@@V?$buffer_span@I@@@Z@std@@@Z",
+    BlockPos a2, int a3, unsigned __int8 a4, int a5, __int64 a6) {
     if (validPosition(a2))
-        return original(this, a2, a3, a4, a5, a6, a7);
+        return original(this, a2, a3, a4, a5, a6);
     fixPlayerPosition(movingViewPlayer);
     return 0;
 }
@@ -213,7 +213,7 @@ TInstanceHook(NetworkPeer::DataStatus,
       "allocator@D@2@@std@@AEAVNetworkHandler@@AEBV?$shared_ptr@V?$time_point@Usteady_clock@chrono@std@@V?$duration@_"
       "JU?$ratio@$00$0DLJKMKAA@@std@@@23@@chrono@std@@@5@@Z",
     NetworkConnection, string* data, __int64 a3, __int64** a4) {
-    auto status = original(this, data, a3, a4);	
+    auto status = original(this, data, a3, a4);
     if (status == NetworkPeer::DataStatus::HasData) {
         auto stream = ReadOnlyBinaryStream(*data, false);
         auto packetId = stream.getUnsignedVarInt();
@@ -272,27 +272,27 @@ TClasslessInstanceHook(void,
                        "?fireEventPlayerMessage@MinecraftEventing@@AEAAXAEBV?$basic_string@DU?$char_traits@D@std@@V?$"
                        "allocator@D@2@@std@@000@Z",
                        std::string const& a1, std::string const& a2, std::string const& a3, std::string const& a4) {
-    if (ll::isServerStopping())
+    if (ll::globalConfig.enableFixBDSCrash && ll::isServerStopping())
         return;
     original(this, a1, a2, a3, a4);
 }
 
 TClasslessInstanceHook(void, "?fireEventPlayerTransform@MinecraftEventing@@SAXAEAVPlayer@@@Z", class Player& a1) {
-    if (ll::isServerStopping())
+    if (ll::globalConfig.enableFixBDSCrash && ll::isServerStopping())
         return;
     original(this, a1);
 }
 
 TClasslessInstanceHook(void, "?fireEventPlayerTravelled@MinecraftEventing@@UEAAXPEAVPlayer@@M@Z", class Player& a1,
                        float a2) {
-    if (ll::isServerStopping())
+    if (ll::globalConfig.enableFixBDSCrash && ll::isServerStopping())
         return;
     original(this, a1, a2);
 }
 
 TClasslessInstanceHook(void, "?fireEventPlayerTeleported@MinecraftEventing@@SAXPEAVPlayer@@MW4TeleportationCause@1@H@Z",
                        class Player* a1, float a2, int a3, int a4) {
-    if (ll::isServerStopping())
+    if (ll::globalConfig.enableFixBDSCrash && ll::isServerStopping())
         return;
     original(this, a1, a2, a3, a4);
 }
@@ -339,7 +339,7 @@ TInstanceHook(LevelData*,
 // Disable 'Running AutoCompaction...' log.
 bool pauseBLogging = false;
 
-THook(__int64, "std::_Func_impl_no_alloc<<lambda_2166e5158bf5234f43e997b0cbaf4395>,TaskResult>::_Do_call", __int64 a1,
+THook(__int64, "std::_Func_impl_no_alloc<<lambda_2381ef31a87ebf59a36ffb68603804e4>,TaskResult>::_Do_call", __int64 a1,
       __int64 a2) {
     if (ll::globalConfig.disableAutoCompactionLog) {
         pauseBLogging = true;
@@ -387,7 +387,7 @@ THook(LevelChunk*, "?getChunk@BlockSource@@QEBAPEAVLevelChunk@@AEBVChunkPos@@@Z"
     return original(self, a2);
 }
 
-TInstanceHook(BlockSource*, "?getRegionConst@Actor@@QEBAAEBVBlockSource@@XZ", Actor) {
+TInstanceHook(BlockSource*, "?getDimensionBlockSourceConst@Actor@@QEBAAEBVBlockSource@@XZ", Actor) {
 
     auto bs = original(this);
     if (ll::globalConfig.enableFixBDSCrash) {
@@ -396,22 +396,6 @@ TInstanceHook(BlockSource*, "?getRegionConst@Actor@@QEBAAEBVBlockSource@@XZ", Ac
         }
     }
     return bs;
-}
-
-THook(void*, "?write@StartGamePacket@@UEBAXAEAVBinaryStream@@@Z", void* a, void* b) {
-    if (!ll::globalConfig.enableClientChunkPreGeneration) {
-        dAccess<bool, 1280>(a) = false;
-    }
-    return original(a, b);
-}
-
-THook(bool, "?isEnabled@FeatureToggles@@QEBA_NW4FeatureOptionID@@@Z", __int64 a1, int a2) {
-    if (!ll::globalConfig.enableClientChunkPreGeneration) {
-        if (a2 == 59) {
-            return 0;
-        }
-    }
-    return original(a1, a2);
 }
 
 //From https://github.com/dreamguxiang/BETweaker
@@ -431,16 +415,16 @@ TInstanceHook(void, "?handle@ServerNetworkHandler@@UEAAXAEBVNetworkIdentifier@@A
             bool flying;
             if (!pkt.tryGetBool(flying))
                 return;
-            auto abilities = sp->getAbilities();
-            auto mayFly = abilities->getAbility(AbilitiesIndex::MayFly).getBool();
+            auto& abilities = sp->getAbilities();
+            auto mayFly = abilities.getAbility(AbilitiesIndex::MayFly).getBool();
             flying = flying && mayFly;
-            Ability& ab = abilities->getAbility(AbilitiesLayer(1), AbilitiesIndex::Flying);
+            Ability& ab = abilities.getAbility(AbilitiesLayer(1), AbilitiesIndex::Flying);
             ab.setBool(0);
             if (flying)
                 ab.setBool(1);
-            UpdateAbilitiesPacket packet(sp->getUniqueID(), *abilities);
+            UpdateAbilitiesPacket packet(sp->getUniqueID(), abilities);
             auto pkt2 = UpdateAdventureSettingsPacket(AdventureSettings());
-            abilities->setAbility(AbilitiesIndex::Flying, flying);
+            abilities.setAbility(AbilitiesIndex::Flying, flying);
             sp->sendNetworkPacket(pkt2);
             sp->sendNetworkPacket(packet);
         }

@@ -38,9 +38,6 @@ void inline to_json(nlohmann::json& j, const LLConfig& conf) {
             {"SimpleServerLogger", {
                 {"enabled", conf.enableSimpleServerLogger}
             }},
-            {"FixDisconnectBug", {
-                {"enabled", conf.enableFixDisconnectBug}
-            }},
             {"UnlockCmd", {
                 {"enabled", conf.enableUnlockCmd}
             }},
@@ -91,14 +88,17 @@ void inline to_json(nlohmann::json& j, const LLConfig& conf) {
             {"ParticleAPI", {
                 {"enabled", conf.enableParticleAPI}
             }},
-             {"PermissionAPI", {
+            {"PermissionAPI", {
                 {"enabled", conf.enablePermissionAPI}
-            }},
-             {"ClientChunkPreGeneration", {
-                {"enabled", conf.enableClientChunkPreGeneration}
             }},
             {"FixAbility", {
                 {"enabled", conf.enableFixAbility}
+            }},
+            {"FixBroadcastBug", {
+                {"enabled", conf.enableFixBroadcastBug}
+            }},
+            {"DisableAutoCompactionLog", {
+                {"enabled", conf.disableAutoCompactionLog}
             }},
         }}
     };
@@ -134,10 +134,6 @@ void inline from_json(const nlohmann::json& j, LLConfig& conf) {
         if (modules.find("SimpleServerLogger") != modules.end()) {
             const nlohmann::json& setting = modules.at("SimpleServerLogger");
             conf.enableSimpleServerLogger = setting.value("enabled", true);
-        }
-        if (modules.find("FixDisconnectBug") != modules.end()) {
-            const nlohmann::json& setting = modules.at("FixDisconnectBug");
-            conf.enableFixDisconnectBug = setting.value("enabled", true);
         }
         if (modules.find("FixListenPort") != modules.end()) {
             const nlohmann::json& setting = modules.at("FixListenPort");
@@ -216,10 +212,6 @@ void inline from_json(const nlohmann::json& j, LLConfig& conf) {
             const nlohmann::json& setting = modules.at("PermissionAPI");
             conf.enablePermissionAPI = setting.value("enabled", false);
         }
-        if (modules.find("ClientChunkPreGeneration") != modules.end()) {
-            const nlohmann::json& setting = modules.at("ClientChunkPreGeneration");
-            conf.enableClientChunkPreGeneration = setting.value("enabled", true);
-        }
         if (modules.find("FixAbility") != modules.end()) {
             const nlohmann::json& setting = modules.at("FixAbility");
             conf.enableFixAbility = setting.value("enabled", true);
@@ -241,7 +233,7 @@ inline bool SaveConfig(nlohmann::json& config) {
 
 /* deprecated
 
-void ChooseLanguage() { 
+void ChooseLanguage() {
     std::unordered_map<std::string, std::string> languageList = {{"en", "English"}, {"zh_CN", "简体中文"}, {"zh_TW", "繁体中文"}, {"ja", "日本語"}, {"ru", "Русский"}, {"id", "Indonesian"}, {"th", "ไทย"}, {"it", "Italiano"}, {"vi", "tiếng việt"}};
     ll::logger.info("Please select your language first");
     std::unordered_map<unsigned short, std::string> languages;

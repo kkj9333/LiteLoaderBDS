@@ -11,7 +11,6 @@
 
 namespace ll {
 
-constexpr const char* NO_CRASH_LOGGER_PLUGIN_LIST[] = {"AntiCheats"};
 struct CommandLineOption {
     bool noColorOption = false;
 };
@@ -31,13 +30,12 @@ struct LLConfig {
     bool alwaysLaunchScriptEngine = false;
 
     bool enableAddonsHelper = true;
-    std::string addonsInstallPath = "plugins/AddonsHelper";
+    std::string addonsInstallPath = ".\\plugins\\AddonsHelper\\";
 
     bool enableCrashLogger = true;
-    std::string crashLoggerPath = "plugins\\LiteLoader\\CrashLogger_Daemon.exe";
+    std::string crashLoggerPath = ".\\plugins\\LiteLoader\\CrashLogger_Daemon.exe";
     std::string antiGiveCommand = "kick {player}";
     bool enableSimpleServerLogger = true;
-    bool enableFixDisconnectBug = true;
     bool enableFixListenPort = false;
     bool enableAntiGive = true;
     bool enableUnlockCmd = true;
@@ -57,7 +55,6 @@ struct LLConfig {
     bool enableFixBDSCrash = true;
     bool enableParticleAPI = false;
     bool enablePermissionAPI = true;
-    bool enableClientChunkPreGeneration = true;
     bool enableFixAbility = true;
     std::vector<std::string> outputFilterRegex = {};
 };

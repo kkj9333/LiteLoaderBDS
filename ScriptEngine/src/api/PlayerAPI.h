@@ -98,6 +98,15 @@ public:
     Local<Value> heal(const Arguments& args);
     Local<Value> setHealth(const Arguments& args);
     Local<Value> setMaxHealth(const Arguments& args);
+    Local<Value> setAbsorption(const Arguments& args);
+    Local<Value> setAttackDamage(const Arguments& args);
+    Local<Value> setMaxAttackDamage(const Arguments& args);
+    Local<Value> setFollowRange(const Arguments& args);
+    Local<Value> setKnockbackResistance(const Arguments& args);
+    Local<Value> setLuck(const Arguments& args);
+    Local<Value> setMovementSpeed(const Arguments& args);
+    Local<Value> setUnderwaterMovementSpeed(const Arguments& args);
+    Local<Value> setLavaMovementSpeed(const Arguments& args);
     Local<Value> setHungry(const Arguments& args);
     Local<Value> setOnFire(const Arguments& args);
     Local<Value> setFire(const Arguments& args);
@@ -180,6 +189,7 @@ public:
 
     // SimulatedPlayer API (API/SimulatedPlayerAPI.cpp)
 
+    Local<Value> simulateRespawn(const Arguments& args);
     Local<Value> simulateSneak(const Arguments& args);
     Local<Value> simulateAttack(const Arguments& args);
     Local<Value> simulateDestroy(const Arguments& args);
